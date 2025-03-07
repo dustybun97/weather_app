@@ -1,7 +1,8 @@
 <script setup>
 import { ref } from 'vue'
 import BorderLine from './BorderLine.vue'
-
+import WeatherForcastDay from './WeatherForcastDay.vue'
+import WeatherInfo from './WeatherInfo.vue'
 defineProps({
   place: Object
 })
@@ -47,7 +48,7 @@ const removePlace = (placeName) => {
 
     <!-- forecast -->
     <div v-for="(day, idx) in place.forecast.forecastday" :key="idx">
-      <WeatherForecastDay :day="day" />
+      <WeatherForcastDay :day="day" />
     </div>
 
     <BorderLine />
