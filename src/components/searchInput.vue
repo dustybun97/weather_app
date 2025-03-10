@@ -9,6 +9,7 @@ const searchTerm = reactive({
   results: null,
 });
 
+// ค้นหาเมืองแบบแนะนำ (auto suggest)
 const handleSearch = () => {
   clearTimeout(searchTerm.timeout);
   searchTerm.timeout = setTimeout(async () => {
@@ -17,7 +18,7 @@ const handleSearch = () => {
         `https://api.weatherapi.com/v1/search.json?key=4916bbe38db34274af241906250403&q=${searchTerm.search}`
       );
       const data = await res.json();
-      console.log(data);
+      console.log("suggestion: ", data);
       searchTerm.results = data;
     } else {
       searchTerm.results = null;
@@ -25,20 +26,36 @@ const handleSearch = () => {
   }, 500);
 };
 
+// ดึงข้อมูลอากาศจาก city ที่เลือก (จาก suggestion)
 const getWeather = async (id) => {
-  const res =
-    await fetch(`https://api.weatherapi.com/v1/forecast.json?key=4916bbe38db34274af241906250403&q=id:${id}&days=3&aqi=no&alerts=no
-`);
+  const res = await fetch(
+    `https://api.weatherapi.com/v1/forecast.json?key=4916bbe38db34274af241906250403&q=id:${id}&days=3&aqi=no&alerts=no`
+  );
   const data = await res.json();
   emit("place-data", data);
   searchTerm.search = "";
   searchTerm.results = null;
 };
+
+// ดึงข้อมูลอากาศจากชื่อเมืองที่พิมพ์แล้วกด Enter
+const searchWeatherDirectly = async () => {
+  if (searchTerm.search.trim() === "") return;
+
+  const res = await fetch(
+    `https://api.weatherapi.com/v1/forecast.json?key=4916bbe38db34274af241906250403&q=${searchTerm.search}&days=3&aqi=no&alerts=no`
+  );
+  const data = await res.json();
+  console.log("direct search: ", data);
+  emit("place-data", data);
+  searchTerm.search = "";
+  searchTerm.results = null;
+};
 </script>
+
 <template>
   <div>
     <!-- search box -->
-    <form>
+    <form @submit.prevent="searchWeatherDirectly">
       <div class="flex items-center bg-white rounded-lg shadow-lg">
         <i class="fa-solid fa-search p-2 text-indigo-600"></i>
         <input
