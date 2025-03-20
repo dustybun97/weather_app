@@ -1,11 +1,17 @@
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted } from "vue";
 import searchInput from "./components/searchInput.vue";
 import WeatherCard from "./components/weatherCard.vue";
 import currentLocation from "./components/currentLocation.vue";
+import Navbar from "./components/Navbar.vue";
+import WeatherFooter from "./components/WeatherFooter.vue";
+import Date from "./components/Date.vue";
+import LeafletMap from "./components/LeafletMap.vue";
 
-const apiKey = "4916bbe38db34274af241906250403";
 const places = ref([]);
+const mainRef = ref(null);  // สร้าง ref เพื่ออ้างอิงถึง <main>
+
+// เพิ่มข้อมูลเมือง
 const addPlace = (data) => {
   // เช็คชื่อเมืองซ้ำ (ป้องกันใส่ซ้ำ)
   const isExist = places.value.some(
@@ -16,48 +22,42 @@ const addPlace = (data) => {
   }
 };
 
+// ลบข้อมูลเมือง
 const deletePlace = (name) => {
   places.value = places.value.filter((place) => place.location.name !== name);
 };
 
-
+// Auto scroll เมื่อ component ถูก mount
+onMounted(() => {
+  if (mainRef.value) {
+    mainRef.value.scrollIntoView({ behavior: "smooth" });
+  }
+});
 </script>
 
 <template>
-  <div class="bg-cover" style="background-image: url('/4049458.jpg')">
-    <currentLocation />
-    <!-- date -->
-    <div class="text-center mb-6">
-      {{
-        new Date().toLocaleDateString("en-us", {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        })
-      }}
+  <Navbar />
+  <Date />
+  <currentLocation />
+  <LeafletMap />
+  <!-- error location -->
+  <div v-if="error" class="text-center text-red-500">{{ error }}</div>
+  
+  <!-- main content ที่ใช้ ref -->
+  <main ref="mainRef" class="flex-row justify-center items-center">
+    <!-- search box -->
+    <div class="mb-10 flex justify-center items-center">
+      <searchInput @place-data="addPlace" />
     </div>
-    <!-- error location -->
-    <div v-if="error" class="text-center text-red-500">{{ error }}</div>
-
-    <main>
-      <!-- search box -->
-      <div class="mb-8">
-        <searchInput @place-data="addPlace" />
+    <!-- weather card -->
+    <div class="grid grid-cols-3 gap-4">
+      <div v-for="place in places" :key="place.location.name">
+        <WeatherCard :place="place" @delete-place="deletePlace" />
       </div>
-      <!-- weather card -->
-      <div class="grid grid-cols-3 gap-4">
-        <div v-for="place in places" :key="place.location.name">
-          <WeatherCard :place="place" @delete-place="deletePlace" />
-        </div>
-      </div>
-    </main>
-  </div>
+    </div>
+  </main>
+  
+  <WeatherFooter />
 </template>
 
-<style scoped>
-/* เพิ่มเติมหากอยากให้พื้นหลัง cover ทั้งหน้าจอ */
-.min-h-screen {
-  min-height: 100vh;
-}
-</style>
+<style scoped></style>

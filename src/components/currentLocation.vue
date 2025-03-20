@@ -1,14 +1,16 @@
 <script setup>
 import { ref, onMounted } from "vue";
 
-const apiKey = "4916bbe38db34274af241906250403"; // ใส่ API Key จาก WeatherAPI
+const apiKey = import.meta.env.VITE_API_KEY; // ใส่ API Key จาก WeatherAPI
 const location = ref("กำลังดึงข้อมูล...");
 const temperature = ref(null);
 const condition = ref("");
 const icon = ref("");
+const lat = ref(null);
+const lon = ref(null);
 
-const getWeather = async (lat, lon) => {
-  const url = `https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${lat},${lon}&lang=th`;
+const getWeather = async (latitude, longitude) => {
+  const url = `https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${latitude},${longitude}&lang=th`;
 
   try {
     const response = await fetch(url);
@@ -28,6 +30,8 @@ onMounted(() => {
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
+        lat.value = latitude; // อัปเดตค่า lat
+        lon.value = longitude; // อัปเดตค่า lon
         getWeather(latitude, longitude);
       },
       () => {
@@ -38,15 +42,16 @@ onMounted(() => {
     location.value = "เบราว์เซอร์ไม่รองรับ Geolocation";
   }
 });
+
 </script>
 
-<template>
-  <div class="weather-container">
+<template class="bg-fixed">
+  <div class="weather-container flex-col justify-center items-center ">
     <h2>Your current weather</h2>
     <p>{{ location }}</p>
     <p v-if="temperature">{{ temperature }}</p>
     <p v-if="condition">{{ condition }}</p>
-    <img v-if="icon" :src="icon" alt="Weather Icon" />
+    <img v-if="icon" :src="icon" alt="Weather Icon" class="pl-24" />
   </div>
 </template>
 

@@ -2,6 +2,7 @@
 import { reactive } from "vue";
 
 const emit = defineEmits(["place-data"]);
+const apiKey = import.meta.env.VITE_API_KEY; // ใส่ API Key จาก WeatherAPI
 
 const searchTerm = reactive({
   search: "",
@@ -15,7 +16,7 @@ const handleSearch = () => {
   searchTerm.timeout = setTimeout(async () => {
     if (searchTerm.search !== "") {
       const res = await fetch(
-        `https://api.weatherapi.com/v1/search.json?key=4916bbe38db34274af241906250403&q=${searchTerm.search}`
+        `https://api.weatherapi.com/v1/search.json?key=${apiKey}&q=${searchTerm.search}`
       );
       const data = await res.json();
       console.log("suggestion: ", data);
@@ -53,7 +54,7 @@ const searchWeatherDirectly = async () => {
 </script>
 
 <template>
-  <div>
+  <div class="w-[1000px]">
     <!-- search box -->
     <form @submit.prevent="searchWeatherDirectly">
       <div class="flex items-center bg-white rounded-lg shadow-lg">
